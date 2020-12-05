@@ -19,6 +19,7 @@ class Algo:
 
 class TwoMovingAverages(Algo):
     name = "Moving Average"
+    price_tag = 'Adj Close'
 
     def __init__(self, window1=30, window2=100):
         self.SMAshort = pd.DataFrame()
@@ -32,14 +33,14 @@ class TwoMovingAverages(Algo):
         self.SMAshort = pd.DataFrame()
         self.SMAlong = pd.DataFrame()
 
-        self.SMAshort['Adj Close'] = self.d['Adj Close'].rolling(window=self.window1).mean()
-        self.SMAlong['Adj Close'] = self.d['Adj Close'].rolling(window=self.window2).mean()
+        self.SMAshort[self.price_tag] = self.d[self.price_tag].rolling(window=self.window1).mean()
+        self.SMAlong[self.price_tag] = self.d[self.price_tag].rolling(window=self.window2).mean()
 
         try:
-            last_SMA_short = self.SMAshort.iloc[-2]['Adj Close']
-            current_SMA_short = self.SMAshort.iloc[-1]['Adj Close']
-            last_SMA_long = self.SMAlong.iloc[-2]['Adj Close']
-            current_SMA_long = self.SMAlong.iloc[-1]['Adj Close']
+            last_SMA_short = self.SMAshort.iloc[-2][self.price_tag]
+            current_SMA_short = self.SMAshort.iloc[-1][self.price_tag]
+            last_SMA_long = self.SMAlong.iloc[-2][self.price_tag]
+            current_SMA_long = self.SMAlong.iloc[-1][self.price_tag]
 
             if last_SMA_short < last_SMA_long and current_SMA_short >= current_SMA_long:
                 return 1
