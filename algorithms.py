@@ -6,8 +6,9 @@ from random import randint
 class Algo:
     name = "TradingAlgorith"
 
-    def __init__(self):
+    def __init__(self, price_tag="Close"):
         self.d = pd.DataFrame()
+        self.price_tag = price_tag
 
     def run(self, new_entry=None):
         self.d.append(new_entry)
@@ -19,14 +20,13 @@ class Algo:
 
 class TwoMovingAverages(Algo):
     name = "Moving Average"
-    price_tag = 'Adj Close'
 
-    def __init__(self, window1=30, window2=100):
+    def __init__(self, window1=30, window2=100, price_tag="Close"):
         self.SMAshort = pd.DataFrame()
         self.SMAlong = pd.DataFrame()
         self.window1 = window1
         self.window2 = window2
-        Algo.__init__(self)
+        Algo.__init__(self, price_tag=price_tag)
 
     def run(self, new_entry=None):
         self.d = self.d.append(new_entry)

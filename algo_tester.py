@@ -7,13 +7,17 @@ plt.style.use('fivethirtyeight')
 
 COMMISSION = 0.99 # 1%
 INVESTMENT = 10000
+PRICE = "Close"
 
 
 class AlgoTester():
 
-    def __init__(self, dataset_path, algo, investment):
+    def __init__(self, dataset_path, algo, investment, ticker=None):
         """receives the dataset path and the algorithm that you want to test"""
-        self.ticker = dataset_path.split('/')[1].split('.')[0]
+        if ticker:
+            self.ticker = ticker
+        else:
+            self.ticker = dataset_path.split('/')[1].split('.')[0]
         self.initial_investment = investment
         self.cash = investment
         self.dataset = pd.read_csv(dataset_path)
@@ -34,7 +38,7 @@ class AlgoTester():
         def apply_algo(row):
             """function that applies the algorithm to each dataframe row"""
             current_buy_sell = self.algo.run(row)
-            self.build_confidence(current_buy_sell, row['Adj Close'])
+            self.build_confidence(current_buy_sell, row[PRICE])
 
         self.dataset.apply(
             lambda row:
@@ -44,10 +48,10 @@ class AlgoTester():
 
         self.dataset["buy_sell"] = self.buy_sell
         self.add_all_to_dataset()
-        print(self.dataset)
+        #print(self.dataset)
         self.prepare_report()
-        self.plot_diagram()
-        return self.dataset
+        #self.plot_diagram()
+        return (self.investment[-1], self.variation[-1])
 
     def add_all_to_dataset(self):
         self.dataset['buy_sell'] = self.buy_sell
@@ -102,7 +106,7 @@ class AlgoTester():
     def plot_diagram(self):
         dt = self.dataset
         plt.figure(figsize=(12.5, 4.5))
-        plt.plot(dt['Adj Close'], label=self.ticker, alpha=0.35)
+        plt.plot(dt[PRICE], label=self.ticker, alpha=0.35)
         #plt.plot(dt['investment'], label="investment")
         #plt.plot(dt['variation'], label="variation")
         plt.scatter(dt.index, dt['buy'], label='Buy', marker='^', color='green')
@@ -120,9 +124,38 @@ class AlgoTester():
        print("Variation: {}".format(self.variation[-1]))      
 
 
+class MonteCarlo():
+    INIT_TICKERS = """AMZN FB IDXX ILMN MA PYPL SHOP SIVB DIS OKTA NTDOY NFLX ZNGA TWLO ATVI BKNG HUBS AAPL
+GILD ZM BA MSFT CVS T CAH MMM TSLA ^FTSE DAX ^FCHI ^NDX ^DJI AZN.L AZN EPD PFE BTC-USD ETH-USD
+CUBA ^XAU BIP BRK-B MTCH SPGI"""
 
-a = TwoMovingAverages(10, 80)
-t = AlgoTester(dataset_path="prices/NFLX.csv", algo=a, investment=INVESTMENT)
+    def __init__(self, ticker_list=None):
+        if ticker_list:
+            self.tickers = ticker_list
+        else:
+            self.tickers = self.INIT_TICKERS.split()
+    
+    def run(self):
+        d = {}
 
-t.run()
+        d["ticker"] = []
+        d["roi"] = []
+        d["variation"] = []
+
+        for ticker in self.tickers:
+            print("Current ticker: "+ticker)
+            path = "stock_apis/prices/{0}.csv".format(ticker)
+            a = TwoMovingAverages(50, 100, price_tag=PRICE)
+            t = AlgoTester(dataset_path=path, algo=a, investment=10000, ticker=ticker)
+            (roi, variation) = t.run()
+            d["ticker"].append(ticker)
+            d["roi"].append(roi)
+            d["variation"].append(variation)
+        
+        df = pd.DataFrame(data=d)
+        df.to_csv("MonteCarlo.csv")
+
+mc = MonteCarlo()
+
+mc.run()
 

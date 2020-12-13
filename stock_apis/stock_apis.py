@@ -6,7 +6,7 @@ tickers = """AMZN FB IDXX ILMN MA PYPL SHOP SIVB DIS OKTA NTDOY NFLX ZNGA TWLO A
 GILD ZM BA MSFT CVS T CAH MMM TSLA ^FTSE DAX ^FCHI ^NDX ^DJI AZN.L AZN EPD PFE BTC-USD ETH-USD
 CUBA ^XAU BIP BRK-B MTCH SPGI"""
 
-tickers = indexes.split()
+tickers = tickers.split()
 
 
 for ticker in tickers:
